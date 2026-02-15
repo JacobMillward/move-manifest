@@ -1,21 +1,30 @@
 # Moving Helper
 
-Small Vite + React app to track moving boxes and their contents.
+A Vite + React web app for organizing and tracking moving boxes with contents, generating printable labels and manifests.
+
+🌐 **Live**: https://move.millward.dev
 
 ## Features
 
-- Track boxes by Number and Room
-- Add items grouped under each box
-- Number input auto-increments to the next available box number, but stays editable
-- Persist all data in localStorage
-- Export all data to CSV
-- Import CSV back into the app
+- **Box Management**: Track boxes by number and room assignment
+- **Item Tracking**: Add items grouped under each box with auto-increment for box numbers
+- **Packing Labels**: Generate and print customizable packing labels for each box
+- **Moving Manifest**: Create a printable manifest listing all boxes and their contents
+- **Data Persistence**: All data persists in localStorage
+- **CSV Import/Export**: Export inventory as CSV or import from existing CSV files
+
+## Routes
+
+- `/` - Main dashboard with Add Box and Packing Labels tabs
+- `/manifest` - Printable manifest of all boxes
+- `/labels` - Packing labels generation and printing
 
 ## Stack
 
-- React + TypeScript + Vite
-- Tailwind CSS
-- DaisyUI 5
+- React 19 + TypeScript + Vite
+- Tailwind CSS 4 + DaisyUI 5
+- nuqs for URL-based state management
+- Vitest for testing
 
 ## Development
 
@@ -31,10 +40,34 @@ Start dev server:
 npm run dev
 ```
 
+Run tests:
+
+```bash
+npm test
+```
+
+Run tests in watch mode:
+
+```bash
+npm run test:watch
+```
+
+Lint code:
+
+```bash
+npm run lint
+```
+
 Build production bundle:
 
 ```bash
 npm run build
+```
+
+Preview production build locally:
+
+```bash
+npm run preview
 ```
 
 ## CSV Format
