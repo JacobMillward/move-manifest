@@ -1,7 +1,6 @@
 import type { Box } from './boxes'
 
-const LABEL_HEADER_HEIGHT_CM = 1.6
-const LABEL_ROW_HEIGHT_CM = 0.62
+const LABEL_COLUMN_WIDTH_CM = 6
 
 function escapeHtml(value: string): string {
   return value
@@ -11,43 +10,61 @@ function escapeHtml(value: string): string {
     .replaceAll('"', '&quot;')
 }
 
-function splitItemsIntoColumns(items: string[], maxHeightCm: number): string[][] {
+function splitItemsIntoColumns(items: string[], maxWidthCm: number): string[][] {
   const safeItems = items.length > 0 ? items : ['']
-  const availableHeight = Math.max(maxHeightCm - LABEL_HEADER_HEIGHT_CM, LABEL_ROW_HEIGHT_CM)
-  const maxRowsPerColumn = Math.max(1, Math.floor(availableHeight / LABEL_ROW_HEIGHT_CM))
-  const columns: string[][] = []
+  const maxColumns = Math.max(1, Math.floor(maxWidthCm / LABEL_COLUMN_WIDTH_CM))
+  const rows = Math.max(1, Math.ceil(safeItems.length / maxColumns))
+  const columns: string[][] = Array.from({ length: maxColumns }, () => [])
 
-  for (let index = 0; index < safeItems.length; index += maxRowsPerColumn) {
-    columns.push(safeItems.slice(index, index + maxRowsPerColumn))
+  for (let rowIndex = 0; rowIndex < rows; rowIndex += 1) {
+    for (let columnIndex = 0; columnIndex < maxColumns; columnIndex += 1) {
+      const itemIndex = rowIndex * maxColumns + columnIndex
+      const value = safeItems[itemIndex] ?? ''
+      columns[columnIndex].push(value)
+    }
   }
 
   return columns
 }
 
-export function buildPrintableLabelsHtml(boxes: Box[], maxHeightCm: number): string {
+export function buildPrintableLabelsHtml(boxes: Box[], maxWidthCm: number): string {
   const labelsHtml = boxes
     .map((box) => {
-      const columns = splitItemsIntoColumns(box.items, maxHeightCm)
-      const columnTables = columns
-        .map((columnItems, columnIndex) => {
-          const title = columnIndex === 0 ? `Box ${box.number}` : `Box ${box.number} (cont.)`
-          const rows = columnItems
-            .map((item) => `<tr><td>${escapeHtml(item)}</td></tr>`)
-            .join('')
+      const columns = splitItemsIntoColumns(box.items, maxWidthCm)
+      const maxRowsPerColumn = columns.reduce(
+        (maximum, columnItems) => Math.max(maximum, columnItems.length),
+        0,
+      )
 
-          return `
-            <table class="label-column" style="max-height:${maxHeightCm}cm">
-              <thead>
-                <tr><th>${escapeHtml(title)}</th></tr>
-                <tr><th class="room">${escapeHtml(box.room || 'Unassigned room')}</th></tr>
-              </thead>
-              <tbody>${rows}</tbody>
-            </table>
-          `
+      const headerCells = columns
+        .map((_, columnIndex) => {
+          if (columnIndex > 0) {
+            return '<th></th>'
+          }
+
+          const room = box.room || 'Unassigned room'
+          return `<th>Box ${box.number} • ${escapeHtml(room)}</th>`
         })
         .join('')
 
-      return `<section class="label-group">${columnTables}</section>`
+      const bodyRows = Array.from({ length: maxRowsPerColumn }, (_, rowIndex) => {
+        const rowCells = columns
+          .map((columnItems) => `<td>${escapeHtml(columnItems[rowIndex] ?? '')}</td>`)
+          .join('')
+
+        return `<tr>${rowCells}</tr>`
+      }).join('')
+
+      return `
+        <section class="label-group">
+          <table class="label-table" style="max-width:${maxWidthCm}cm">
+            <thead>
+              <tr>${headerCells}</tr>
+            </thead>
+            <tbody>${bodyRows}</tbody>
+          </table>
+        </section>
+      `
     })
     .join('')
 
@@ -100,21 +117,18 @@ export function buildPrintableLabelsHtml(boxes: Box[], maxHeightCm: number): str
           }
 
           .label-group {
-            display: flex;
-            gap: 3mm;
-            align-items: flex-start;
+            display: block;
             width: fit-content;
           }
 
-          .label-column {
-            width: 60mm;
+          .label-table {
             border-collapse: collapse;
             table-layout: fixed;
             page-break-inside: avoid;
           }
 
-          .label-column th,
-          .label-column td {
+          .label-table th,
+          .label-table td {
             border: 1px solid #000;
             padding: 3mm 2.5mm;
             vertical-align: top;
@@ -122,15 +136,13 @@ export function buildPrintableLabelsHtml(boxes: Box[], maxHeightCm: number): str
             overflow-wrap: break-word;
             font-size: 12px;
             line-height: 1.2;
+            width: 60mm;
           }
 
-          .label-column th {
+          .label-table th {
             text-align: left;
             font-size: 13px;
-          }
-
-          .label-column th.room {
-            font-weight: normal;
+            font-weight: 600;
           }
 
           @media print {

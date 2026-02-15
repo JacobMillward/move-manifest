@@ -11,7 +11,7 @@ function PackingLabelsTab({
   boxes,
   onStatusMessage,
 }: PackingLabelsTabProps) {
-  const [labelsMaxHeightCm, setLabelsMaxHeightCm] = useState('7')
+  const [labelsMaxWidthCm, setLabelsMaxWidthCm] = useState('15')
   const [excludedLabelBoxIds, setExcludedLabelBoxIds] = useState<string[]>([])
 
   const selectedLabelBoxes = useMemo(
@@ -38,10 +38,10 @@ function PackingLabelsTab({
   }
 
   const generatePackingLabels = () => {
-    const parsedHeight = Number(labelsMaxHeightCm)
+    const parsedWidth = Number(labelsMaxWidthCm)
 
-    if (!Number.isFinite(parsedHeight) || parsedHeight <= 0) {
-      onStatusMessage('Max height must be a positive number in centimeters.')
+    if (!Number.isFinite(parsedWidth) || parsedWidth <= 0) {
+      onStatusMessage('Max width must be a positive number in centimeters.')
       return
     }
 
@@ -50,7 +50,7 @@ function PackingLabelsTab({
       return
     }
 
-    const html = buildPrintableLabelsHtml(selectedLabelBoxes, parsedHeight)
+    const html = buildPrintableLabelsHtml(selectedLabelBoxes, parsedWidth)
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
     const url = URL.createObjectURL(blob)
 
@@ -81,14 +81,14 @@ function PackingLabelsTab({
     <>
       <div className="flex flex-col gap-4">
         <fieldset className="fieldset max-w-xs">
-          <legend className="fieldset-legend">Max Height (cm)</legend>
+          <legend className="fieldset-legend">Max Width (cm)</legend>
           <input
             className="input input-bordered"
             type="number"
             min={0.5}
             step={0.1}
-            value={labelsMaxHeightCm}
-            onChange={(event) => setLabelsMaxHeightCm(event.target.value)}
+            value={labelsMaxWidthCm}
+            onChange={(event) => setLabelsMaxWidthCm(event.target.value)}
           />
         </fieldset>
 
