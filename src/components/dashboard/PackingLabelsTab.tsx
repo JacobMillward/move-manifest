@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import type { Box } from '../lib/boxes'
+import type { Box } from '../../lib/boxes'
 
 type PackingLabelsTabProps = {
   boxes: Box[]

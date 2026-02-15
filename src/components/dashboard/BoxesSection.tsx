@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import type { Box } from '../lib/boxes'
-import RoomInput from './RoomInput'
+import type { Box } from '../../lib/boxes'
+import RoomInput from '../shared/RoomInput'
 
 type ActionResult = {
   success: boolean

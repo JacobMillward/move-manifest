@@ -1,16 +1,16 @@
-import { useMemo, useState } from 'react'
-import { chooseOrientation } from '../lib/labels'
-import type { Box } from '../lib/boxes'
-import { loadBoxes } from '../lib/storage'
+import { useEffect, useMemo, useState } from 'react'
+import { parseAsFloat, useQueryState } from 'nuqs'
+import { chooseOrientation } from '../../lib/labels'
+import type { Box } from '../../lib/boxes'
+import { loadBoxes } from '../../lib/storage'
 
 const LABEL_WIDTH_KEY = 'move-manifest-label-width'
 
-function parseSearchParams(): { width: number; boxIds: string[] } {
+function parseSearchParams(): { boxIds: string[] } {
   const params = new URLSearchParams(window.location.search)
-  const width = Number(params.get('width')) || Number(localStorage.getItem(LABEL_WIDTH_KEY)) || 15
   const idsParam = params.get('ids') || ''
   const boxIds = idsParam ? idsParam.split(',') : []
-  return { width, boxIds }
+  return { boxIds }
 }
 
 function Label({ box, widthCm }: { box: Box; widthCm: number }) {
@@ -45,8 +45,16 @@ function Label({ box, widthCm }: { box: Box; widthCm: number }) {
 function PrintLabelsPage() {
   const initialParams = useMemo(() => parseSearchParams(), [])
   const allBoxes = useMemo(() => loadBoxes(), [])
+  const defaultWidth = useMemo(() => {
+    const stored = Number(localStorage.getItem(LABEL_WIDTH_KEY))
+    return Number.isFinite(stored) && stored > 0 ? stored : 15
+  }, [])
+  const [widthParam, setWidthParam] = useQueryState(
+    'width',
+    parseAsFloat.withDefault(defaultWidth),
+  )
 
-  const [widthInput, setWidthInput] = useState(String(initialParams.width))
+  const [widthInput, setWidthInput] = useState(() => String(widthParam))
   const [excludedIds, setExcludedIds] = useState<string[]>(() => {
     if (initialParams.boxIds.length === 0) return []
     return allBoxes
@@ -55,15 +63,20 @@ function PrintLabelsPage() {
   })
   const [showSettings, setShowSettings] = useState(false)
 
-  const width = Number(widthInput) || 15
+  const width = widthParam
 
   const updateWidth = (value: string) => {
     setWidthInput(value)
     const parsed = Number(value)
     if (Number.isFinite(parsed) && parsed > 0) {
-      localStorage.setItem(LABEL_WIDTH_KEY, value)
+      localStorage.setItem(LABEL_WIDTH_KEY, String(parsed))
+      void setWidthParam(parsed)
     }
   }
+
+  useEffect(() => {
+    setWidthInput(String(widthParam))
+  }, [widthParam])
 
   const boxes = useMemo(
     () => allBoxes.filter((box) => !excludedIds.includes(box.id)),

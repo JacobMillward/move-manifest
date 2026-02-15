@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { loadBoxes } from '../lib/storage'
+import { loadBoxes } from '../../lib/storage'
 
 function ManifestPage() {
   const allBoxes = useMemo(() => loadBoxes().sort((a, b) => a.number - b.number), [])

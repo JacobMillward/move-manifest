@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import RoomInput from './RoomInput'
+import RoomInput from '../shared/RoomInput'
 
 type AddBoxSubmitResult = {
   success: boolean
