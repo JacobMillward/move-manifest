@@ -59,7 +59,7 @@ function OverviewCard({
           >
             Import CSV
           </button>
-          <a href="/manifest" className="btn btn-sm btn-ghost">
+          <a href="/manifest" className="btn btn-ghost">
             Generate Manifest
           </a>
           <input
