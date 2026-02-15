@@ -11,7 +11,7 @@ function escapeHtml(value: string): string {
 export const PRINT_LABELS_CSS = `
   @page {
     size: A4 portrait;
-    margin: 10mm;
+    margin: 0;
   }
 
   * {
