@@ -84,4 +84,34 @@ describe('chooseOrientation', () => {
 
     expect(chooseOrientation(boxes, 12)).toBe('portrait')
   })
+
+  it('defaults to landscape when there are no boxes', () => {
+    expect(chooseOrientation([], 10)).toBe('landscape')
+  })
+
+  it('chooses landscape for labels that fit exactly within landscape height', () => {
+    const boxes: Box[] = [
+      {
+        id: '1',
+        number: 1,
+        room: 'Storage',
+        items: Array.from({ length: 28 }, (_, index) => `Item ${index + 1}`),
+      },
+    ]
+
+    expect(chooseOrientation(boxes, 8)).toBe('landscape')
+  })
+
+  it('chooses portrait when a single label is too tall for landscape', () => {
+    const boxes: Box[] = [
+      {
+        id: '1',
+        number: 1,
+        room: 'Storage',
+        items: Array.from({ length: 30 }, (_, index) => `Item ${index + 1}`),
+      },
+    ]
+
+    expect(chooseOrientation(boxes, 8)).toBe('portrait')
+  })
 })
