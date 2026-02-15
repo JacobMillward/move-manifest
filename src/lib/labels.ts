@@ -1,7 +1,5 @@
 import type { Box } from './boxes'
 
-const LABEL_COLUMN_WIDTH_CM = 6
-
 function escapeHtml(value: string): string {
   return value
     .replaceAll('&', '&amp;')
@@ -10,56 +8,21 @@ function escapeHtml(value: string): string {
     .replaceAll('"', '&quot;')
 }
 
-function splitItemsIntoColumns(items: string[], maxWidthCm: number): string[][] {
-  const safeItems = items.length > 0 ? items : ['']
-  const maxColumns = Math.max(1, Math.floor(maxWidthCm / LABEL_COLUMN_WIDTH_CM))
-  const rows = Math.max(1, Math.ceil(safeItems.length / maxColumns))
-  const columns: string[][] = Array.from({ length: maxColumns }, () => [])
-
-  for (let rowIndex = 0; rowIndex < rows; rowIndex += 1) {
-    for (let columnIndex = 0; columnIndex < maxColumns; columnIndex += 1) {
-      const itemIndex = rowIndex * maxColumns + columnIndex
-      const value = safeItems[itemIndex] ?? ''
-      columns[columnIndex].push(value)
-    }
-  }
-
-  return columns
-}
-
 export function buildPrintableLabelsHtml(boxes: Box[], maxWidthCm: number): string {
   const labelsHtml = boxes
     .map((box) => {
-      const columns = splitItemsIntoColumns(box.items, maxWidthCm)
-      const maxRowsPerColumn = columns.reduce(
-        (maximum, columnItems) => Math.max(maximum, columnItems.length),
-        0,
-      )
+      const safeItems = box.items.length > 0 ? box.items : ['']
+      const room = box.room || 'Unassigned room'
 
-      const headerCells = columns
-        .map((_, columnIndex) => {
-          if (columnIndex > 0) {
-            return '<th></th>'
-          }
-
-          const room = box.room || 'Unassigned room'
-          return `<th>Box ${box.number} • ${escapeHtml(room)}</th>`
-        })
+      const bodyRows = safeItems
+        .map((item) => `<tr><td>${escapeHtml(item)}</td></tr>`)
         .join('')
-
-      const bodyRows = Array.from({ length: maxRowsPerColumn }, (_, rowIndex) => {
-        const rowCells = columns
-          .map((columnItems) => `<td>${escapeHtml(columnItems[rowIndex] ?? '')}</td>`)
-          .join('')
-
-        return `<tr>${rowCells}</tr>`
-      }).join('')
 
       return `
         <section class="label-group">
-          <table class="label-table" style="max-width:${maxWidthCm}cm">
+          <table class="label-table" style="width:${maxWidthCm}cm; max-width:${maxWidthCm}cm;">
             <thead>
-              <tr>${headerCells}</tr>
+              <tr><th>Box ${box.number} • ${escapeHtml(room)}</th></tr>
             </thead>
             <tbody>${bodyRows}</tbody>
           </table>
@@ -136,7 +99,6 @@ export function buildPrintableLabelsHtml(boxes: Box[], maxWidthCm: number): stri
             overflow-wrap: break-word;
             font-size: 12px;
             line-height: 1.2;
-            width: 60mm;
           }
 
           .label-table th {
