@@ -22,11 +22,13 @@ describe('label generation', () => {
     const html = buildPrintableLabelsHtml(boxes, 15)
 
     expect(html).toContain('style="width:15cm; max-width:15cm;"')
-    expect(html).toContain('<tr><th>Box 12 • Office</th></tr>')
-    expect(html).toContain('<tr><th>Box 13 • Kitchen</th></tr>')
-    expect(html).toContain('<tr><td>Laptop</td></tr>')
-    expect(html).toContain('<tr><td>Keyboard</td></tr>')
-    expect(html).toContain('<tr><td>Plates</td></tr>')
+    expect(html).toContain('BOX 12')
+    expect(html).toContain('Office')
+    expect(html).toContain('BOX 13')
+    expect(html).toContain('Kitchen')
+    expect(html).toContain('<li>Laptop</li>')
+    expect(html).toContain('<li>Keyboard</li>')
+    expect(html).toContain('<li>Plates</li>')
   })
 
   it('uses fallback room and blank row when room/items are missing', () => {
@@ -41,8 +43,9 @@ describe('label generation', () => {
 
     const html = buildPrintableLabelsHtml(boxes, 10)
 
-    expect(html).toContain('<tr><th>Box 5 • Unassigned room</th></tr>')
-    expect(html).toContain('<tbody><tr><td></td></tr></tbody>')
+    expect(html).toContain('BOX 5')
+    expect(html).toContain('Unassigned room')
+    expect(html).toContain('<li></li>')
   })
 
   it('escapes HTML-sensitive content in room and item values', () => {
@@ -57,7 +60,7 @@ describe('label generation', () => {
 
     const html = buildPrintableLabelsHtml(boxes, 15)
 
-    expect(html).toContain('Box 1 • &lt;Office &amp; &quot;Study&quot;&gt;')
+    expect(html).toContain('&lt;Office &amp; &quot;Study&quot;&gt;')
     expect(html).toContain('&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt; &amp; cables')
     expect(html).not.toContain('<script>alert("x")</script>')
   })

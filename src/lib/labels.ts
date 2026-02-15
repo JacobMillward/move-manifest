@@ -16,11 +16,13 @@ export const PRINT_LABELS_CSS = `
 
   * {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
   }
 
   body {
     margin: 0;
-    font-family: Arial, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
     background: #fff;
     color: #000;
   }
@@ -33,55 +35,81 @@ export const PRINT_LABELS_CSS = `
     padding: 8px 10mm;
     border-bottom: 1px solid #ddd;
     background: #fff;
+    z-index: 10;
   }
 
   .toolbar button {
     border: 1px solid #333;
-    padding: 6px 10px;
+    padding: 6px 16px;
     background: #fff;
     cursor: pointer;
+    font-size: 14px;
   }
 
   .sheet {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-start;
-    gap: 5mm;
+    gap: 6mm;
     padding: 10mm;
   }
 
-  .label-group {
-    display: block;
-    width: fit-content;
+  .label {
     break-inside: avoid;
     page-break-inside: avoid;
+    border: 2px solid #000;
   }
 
-  .label-table {
-    border-collapse: separate;
-    border-spacing: 0;
-    table-layout: fixed;
-    page-break-inside: avoid;
-    border-top: 2px solid #000;
-    border-left: 2px solid #000;
+  .label-header {
+    background: #000;
+    color: #fff;
+    padding: 2mm 3mm;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 4mm;
   }
 
-  .label-table th,
-  .label-table td {
-    border-bottom: 2px solid #000;
-    border-right: 2px solid #000;
-    padding: 1.5mm 1.5mm;
-    vertical-align: top;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    font-size: 11px;
-    line-height: 1.1;
+  .label-box-number {
+    font-size: 18px;
+    font-weight: 700;
+    white-space: nowrap;
   }
 
-  .label-table th {
-    text-align: left;
-    font-size: 12px;
+  .label-room {
+    font-size: 13px;
     font-weight: 600;
+    text-align: right;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .label-heading {
+    background: #eee;
+    padding: 1.5mm 3mm;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-top: 1px solid #000;
+    border-bottom: 1px solid #000;
+  }
+
+  .label-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .label-items li {
+    padding: 1.2mm 3mm;
+    font-size: 11px;
+    line-height: 1.3;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .label-items li:last-child {
+    border-bottom: none;
   }
 
   @media print {
@@ -102,20 +130,11 @@ export function buildPrintableLabelsMarkup(boxes: Box[], maxWidthCm: number): st
       const safeItems = box.items.length > 0 ? box.items : ['']
       const room = box.room || 'Unassigned room'
 
-      const bodyRows = safeItems
-        .map((item) => `<tr><td>${escapeHtml(item)}</td></tr>`)
+      const itemsList = safeItems
+        .map((item) => `<li>${escapeHtml(item)}</li>`)
         .join('')
 
-      return `
-        <section class="label-group">
-          <table class="label-table" style="width:${maxWidthCm}cm; max-width:${maxWidthCm}cm;">
-            <thead>
-              <tr><th>Box ${box.number} • ${escapeHtml(room)}</th></tr>
-            </thead>
-            <tbody>${bodyRows}</tbody>
-          </table>
-        </section>
-      `
+      return `<article class="label" style="width:${maxWidthCm}cm; max-width:${maxWidthCm}cm;"><div class="label-header"><span class="label-box-number">BOX ${box.number}</span><span class="label-room">${escapeHtml(room)}</span></div><div class="label-heading">Contents</div><ul class="label-items">${itemsList}</ul></article>`
     })
     .join('')
 }
