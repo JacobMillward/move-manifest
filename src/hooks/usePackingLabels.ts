@@ -52,18 +52,31 @@ function usePackingLabels(boxes: Box[]) {
       }
     }
 
-    const printWindow = window.open('', '_blank', 'noopener,noreferrer')
+    const html = buildPrintableLabelsHtml(selectedLabelBoxes, parsedHeight)
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+
+    const printWindow = window.open(url, '_blank')
 
     if (!printWindow) {
+      const link = document.createElement('a')
+      link.href = url
+      link.target = '_blank'
+      link.rel = 'noopener noreferrer'
+      link.click()
+    }
+
+    if (!printWindow) {
+      URL.revokeObjectURL(url)
       return {
         success: false,
         message: 'Unable to open print window. Allow pop-ups and try again.',
       }
     }
 
-    printWindow.document.open()
-    printWindow.document.write(buildPrintableLabelsHtml(selectedLabelBoxes, parsedHeight))
-    printWindow.document.close()
+    setTimeout(() => {
+      URL.revokeObjectURL(url)
+    }, 60_000)
 
     return {
       success: true,
