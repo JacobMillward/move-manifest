@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
-import AddBoxTab from './components/AddBoxTab'
-import BoxesSection from './components/BoxesSection'
-import OverviewCard from './components/OverviewCard'
-import PackingLabelsTab from './components/PackingLabelsTab'
+import AddBoxTab from './components/dashboard/AddBoxTab'
+import BoxesSection from './components/dashboard/BoxesSection'
+import OverviewCard from './components/dashboard/OverviewCard'
+import PackingLabelsTab from './components/dashboard/PackingLabelsTab'
 import useBoxes from './hooks/useBoxes'
 import { useHashRoute } from './hooks/useHashRoute'
 
