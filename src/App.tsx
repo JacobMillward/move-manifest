@@ -4,8 +4,10 @@ import BoxesSection from './components/BoxesSection'
 import OverviewCard from './components/OverviewCard'
 import PackingLabelsTab from './components/PackingLabelsTab'
 import useBoxes from './hooks/useBoxes'
+import { useHashRoute } from './hooks/useHashRoute'
 
 function App() {
+  const [route, setRoute] = useHashRoute()
   const {
     boxes,
     totalItems,
@@ -20,7 +22,8 @@ function App() {
     importBoxesCsv,
   } = useBoxes()
   const [statusMessage, setStatusMessage] = useState('')
-  const [activeTab, setActiveTab] = useState<'add-box' | 'packing-labels'>('add-box')
+
+  const activeTab = route === 'packing-labels' ? 'packing-labels' : 'add-box'
 
   const handleAddBox = (input: { room: string; numberInput: string; itemsInput: string }) => {
     const result = addBoxFromForm(input)
@@ -56,7 +59,7 @@ function App() {
                 type="button"
                 role="tab"
                 className={`tab ${activeTab === 'add-box' ? 'tab-active' : ''}`}
-                onClick={() => setActiveTab('add-box')}
+                onClick={() => setRoute('add-box')}
               >
                 Add Box
               </button>
@@ -64,7 +67,7 @@ function App() {
                 type="button"
                 role="tab"
                 className={`tab ${activeTab === 'packing-labels' ? 'tab-active' : ''}`}
-                onClick={() => setActiveTab('packing-labels')}
+                onClick={() => setRoute('packing-labels')}
               >
                 Packing Labels
               </button>
