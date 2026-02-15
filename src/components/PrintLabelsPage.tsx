@@ -86,6 +86,8 @@ function PrintLabelsPage() {
       flex-wrap: wrap;
       gap: 6mm;
       padding: 10mm;
+      align-items: flex-start;
+      align-content: flex-start;
     }
 
     article {
