@@ -73,7 +73,7 @@ function RoomInput({ value, rooms, onChange, placeholder = 'Room', className = '
       <div className="flex">
         <input
           ref={inputRef}
-          className="input input-bordered input-sm w-full rounded-r-none"
+          className="input input-bordered w-full rounded-r-none"
           placeholder={placeholder}
           value={value}
           onChange={(event) => handleInputChange(event.target.value)}
@@ -83,7 +83,7 @@ function RoomInput({ value, rooms, onChange, placeholder = 'Room', className = '
         />
         <button
           type="button"
-          className="btn btn-bordered btn-sm rounded-l-none border border-l-0 border-base-300 px-1.5"
+          className="btn btn-bordered rounded-l-none border border-l-0 border-base-300 px-1.5"
           tabIndex={-1}
           onClick={toggleDropdown}
           aria-label="Show room suggestions"
