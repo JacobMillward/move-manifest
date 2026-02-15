@@ -13,6 +13,10 @@ A Vite + React web app for organizing and tracking moving boxes with contents, g
 - **Data Persistence**: All data persists in localStorage
 - **CSV Import/Export**: Export inventory as CSV or import from existing CSV files
 
+## Privacy
+
+✅ **Your data stays with you** - All information is stored locally in your browser's localStorage. Nothing is sent to a server or stored anywhere else. Your moving inventory is completely private.
+
 ## Routes
 
 - `/` - Main dashboard with Add Box and Packing Labels tabs

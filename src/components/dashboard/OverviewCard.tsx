@@ -1,3 +1,4 @@
+import { LockKeyhole } from 'lucide-react'
 import { useRef } from 'react'
 import type { ChangeEvent } from 'react'
 
@@ -32,10 +33,18 @@ function OverviewCard({
   return (
     <section className="card bg-base-100 shadow">
       <div className="card-body gap-4">
-        <h1 className="card-title text-2xl">Moving Box Tracker</h1>
-        <p className="text-sm text-base-content/70">
-          Keep a list of boxes, room assignments, and items while moving.
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="card-title text-2xl">Moving Box Tracker</h1>
+            <p className="text-sm text-base-content/70">
+              Keep a list of boxes, room assignments, and items while moving.
+            </p>
+          </div>
+        </div>
+        <div className="alert alert-success py-2 text-sm flex">
+          <LockKeyhole className="w-4 h-4 mr-1" />
+          <span>All data is stored locally on your device and never sent to a server.</span>
+        </div>
 
         <div className="stats stats-vertical bg-base-200 md:stats-horizontal">
           <div className="stat py-3">
