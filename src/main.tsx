@@ -1,8 +1,9 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { NuqsAdapter } from 'nuqs/adapters/react'
 import './index.css'
-import PrintLabelsPage from './components/PrintLabelsPage.tsx'
-import ManifestPage from './components/ManifestPage.tsx'
+import PrintLabelsPage from './components/pages/PrintLabelsPage.tsx'
+import ManifestPage from './components/pages/ManifestPage.tsx'
 
 async function loadApp() {
   const pathname = window.location.pathname
@@ -21,7 +22,9 @@ async function loadApp() {
 loadApp().then((root) => {
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
-      {root}
+      <NuqsAdapter>
+        {root}
+      </NuqsAdapter>
     </StrictMode>,
   )
 })
