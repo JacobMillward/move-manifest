@@ -1,39 +1,55 @@
-import { useMemo, useRef, useState } from 'react'
-import type { ChangeEvent } from 'react'
+import { useMemo, useState } from 'react'
 import { getNextBoxNumber, type Box } from '../lib/boxes'
 import { boxesToCsv, parseBoxesFromCsv } from '../lib/csv'
 import { loadBoxes, saveBoxes as persistBoxes } from '../lib/storage'
 
+type ActionResult = {
+  success: boolean
+  message: string
+}
+
+type AddBoxInput = {
+  room: string
+  numberInput: string
+  itemsInput: string
+}
+
+type AddBoxResult = ActionResult & {
+  nextSuggestedNumber: number
+}
+
 function useBoxes() {
   const [boxes, setBoxes] = useState<Box[]>(() => loadBoxes())
-  const [roomInput, setRoomInput] = useState('')
-  const [numberInput, setNumberInput] = useState(() => String(getNextBoxNumber(loadBoxes())))
-  const [itemsInput, setItemsInput] = useState('')
-  const [statusMessage, setStatusMessage] = useState('')
-  const [newItemByBox, setNewItemByBox] = useState<Record<string, string>>({})
-  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const totalItems = useMemo(
     () => boxes.reduce((total, box) => total + box.items.length, 0),
     [boxes],
   )
 
+  const nextSuggestedBoxNumber = useMemo(() => getNextBoxNumber(boxes), [boxes])
+
   const saveBoxes = (nextBoxes: Box[]) => {
     const sorted = persistBoxes(nextBoxes)
     setBoxes(sorted)
   }
 
-  const addBox = () => {
+  const addBoxFromForm = ({ room, numberInput, itemsInput }: AddBoxInput): AddBoxResult => {
     const parsedNumber = Number(numberInput)
 
     if (!Number.isInteger(parsedNumber) || parsedNumber < 1) {
-      setStatusMessage('Box number must be a positive whole number.')
-      return
+      return {
+        success: false,
+        message: 'Box number must be a positive whole number.',
+        nextSuggestedNumber: nextSuggestedBoxNumber,
+      }
     }
 
     if (boxes.some((box) => box.number === parsedNumber)) {
-      setStatusMessage('That box number already exists. Use a different number.')
-      return
+      return {
+        success: false,
+        message: 'That box number already exists. Use a different number.',
+        nextSuggestedNumber: nextSuggestedBoxNumber,
+      }
     }
 
     const parsedItems = itemsInput
@@ -46,34 +62,40 @@ function useBoxes() {
       {
         id: crypto.randomUUID(),
         number: parsedNumber,
-        room: roomInput.trim(),
+        room: room.trim(),
         items: parsedItems,
       },
     ]
 
     saveBoxes(nextBoxes)
-    setRoomInput('')
-    setItemsInput('')
-    setNumberInput(String(getNextBoxNumber(nextBoxes)))
-    setStatusMessage('Box added.')
+    return {
+      success: true,
+      message: 'Box added.',
+      nextSuggestedNumber: getNextBoxNumber(nextBoxes),
+    }
   }
 
-  const updateBox = (boxId: string, updates: Partial<Box>) => {
-    const nextBoxes = boxes.map((box) => (box.id === boxId ? { ...box, ...updates } : box))
+  const updateBoxRoom = (boxId: string, room: string) => {
+    const nextBoxes = boxes.map((box) => (box.id === boxId ? { ...box, room } : box))
     saveBoxes(nextBoxes)
   }
 
-  const updateBoxNumber = (boxId: string, nextNumberText: string) => {
+  const updateBoxNumber = (boxId: string, nextNumberText: string): ActionResult => {
     const parsedNumber = Number(nextNumberText)
     const currentBox = boxes.find((box) => box.id === boxId)
 
     if (!currentBox) {
-      return
+      return {
+        success: false,
+        message: 'Box not found.',
+      }
     }
 
     if (!Number.isInteger(parsedNumber) || parsedNumber < 1) {
-      setStatusMessage('Box number must be a positive whole number.')
-      return
+      return {
+        success: false,
+        message: 'Box number must be a positive whole number.',
+      }
     }
 
     const duplicate = boxes.some(
@@ -81,55 +103,89 @@ function useBoxes() {
     )
 
     if (duplicate) {
-      setStatusMessage('That box number already exists.')
-      return
+      return {
+        success: false,
+        message: 'That box number already exists.',
+      }
     }
 
     if (currentBox.number === parsedNumber) {
-      return
+      return {
+        success: true,
+        message: '',
+      }
     }
 
-    updateBox(boxId, { number: parsedNumber })
-    setStatusMessage('Box number updated.')
+    const nextBoxes = boxes.map((box) =>
+      box.id === boxId ? { ...box, number: parsedNumber } : box,
+    )
+    saveBoxes(nextBoxes)
+
+    return {
+      success: true,
+      message: 'Box number updated.',
+    }
   }
 
-  const removeBox = (boxId: string) => {
+  const removeBox = (boxId: string): ActionResult => {
     const nextBoxes = boxes.filter((box) => box.id !== boxId)
     saveBoxes(nextBoxes)
-    setNumberInput(String(getNextBoxNumber(nextBoxes)))
-    setStatusMessage('Box removed.')
+    return {
+      success: true,
+      message: 'Box removed.',
+    }
   }
 
-  const addItemToBox = (boxId: string) => {
-    const draftItem = (newItemByBox[boxId] ?? '').trim()
+  const addItemToBox = (boxId: string, draftItem: string): ActionResult => {
+    const trimmedItem = draftItem.trim()
 
-    if (!draftItem) {
-      return
+    if (!trimmedItem) {
+      return {
+        success: false,
+        message: 'Item cannot be empty.',
+      }
     }
 
     const targetBox = boxes.find((box) => box.id === boxId)
     if (!targetBox) {
-      return
+      return {
+        success: false,
+        message: 'Box not found.',
+      }
     }
 
-    updateBox(boxId, { items: [...targetBox.items, draftItem] })
-    setNewItemByBox((current) => ({ ...current, [boxId]: '' }))
-    setStatusMessage('Item added.')
+    const nextBoxes = boxes.map((box) =>
+      box.id === boxId ? { ...box, items: [...targetBox.items, trimmedItem] } : box,
+    )
+    saveBoxes(nextBoxes)
+    return {
+      success: true,
+      message: 'Item added.',
+    }
   }
 
-  const removeItemFromBox = (boxId: string, itemIndex: number) => {
+  const removeItemFromBox = (boxId: string, itemIndex: number): ActionResult => {
     const targetBox = boxes.find((box) => box.id === boxId)
     if (!targetBox) {
-      return
+      return {
+        success: false,
+        message: 'Box not found.',
+      }
     }
 
-    updateBox(boxId, {
-      items: targetBox.items.filter((_, index) => index !== itemIndex),
-    })
-    setStatusMessage('Item removed.')
+    const nextBoxes = boxes.map((box) =>
+      box.id === boxId
+        ? { ...box, items: targetBox.items.filter((_, index) => index !== itemIndex) }
+        : box,
+    )
+    saveBoxes(nextBoxes)
+    return {
+      success: true,
+      message: 'Item removed.',
+    }
   }
 
-  const exportCsv = () => {
+  const exportBoxesCsv = (): ActionResult => {
     const blob = new Blob([boxesToCsv(boxes)], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
@@ -137,54 +193,35 @@ function useBoxes() {
     link.download = 'moving-boxes.csv'
     link.click()
     URL.revokeObjectURL(url)
-    setStatusMessage('CSV exported.')
+    return {
+      success: true,
+      message: 'CSV exported.',
+    }
   }
 
-  const importCsv = async (event: ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = event.target.files?.[0]
-
-    if (!selectedFile) {
-      return
-    }
-
+  const importBoxesCsv = async (selectedFile: File): Promise<ActionResult> => {
     const content = await selectedFile.text()
     const importedBoxes = parseBoxesFromCsv(content)
 
     saveBoxes(importedBoxes)
-    setNumberInput(String(getNextBoxNumber(importedBoxes)))
-    setStatusMessage(`Imported ${importedBoxes.length} boxes from CSV.`)
-    event.target.value = ''
-  }
-
-  const setNewItemDraft = (boxId: string, value: string) => {
-    setNewItemByBox((current) => ({
-      ...current,
-      [boxId]: value,
-    }))
+    return {
+      success: true,
+      message: `Imported ${importedBoxes.length} boxes from CSV.`,
+    }
   }
 
   return {
     boxes,
-    roomInput,
-    numberInput,
-    itemsInput,
-    statusMessage,
-    newItemByBox,
-    fileInputRef,
     totalItems,
-    setStatusMessage,
-    setRoomInput,
-    setNumberInput,
-    setItemsInput,
-    addBox,
-    updateBox,
+    nextSuggestedBoxNumber,
+    addBoxFromForm,
+    updateBoxRoom,
     updateBoxNumber,
     removeBox,
     addItemToBox,
     removeItemFromBox,
-    exportCsv,
-    importCsv,
-    setNewItemDraft,
+    exportBoxesCsv,
+    importBoxesCsv,
   }
 }
 

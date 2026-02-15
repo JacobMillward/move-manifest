@@ -1,22 +1,50 @@
+import { useEffect, useState } from 'react'
+
+type AddBoxSubmitResult = {
+  success: boolean
+  message: string
+  nextSuggestedNumber: number
+}
+
 type AddBoxTabProps = {
-  roomInput: string
-  numberInput: string
-  itemsInput: string
-  onRoomInputChange: (value: string) => void
-  onNumberInputChange: (value: string) => void
-  onItemsInputChange: (value: string) => void
-  onAddBox: () => void
+  nextSuggestedNumber: number
+  onAddBox: (input: {
+    room: string
+    numberInput: string
+    itemsInput: string
+  }) => AddBoxSubmitResult
+  onStatusMessage: (message: string) => void
 }
 
 function AddBoxTab({
-  roomInput,
-  numberInput,
-  itemsInput,
-  onRoomInputChange,
-  onNumberInputChange,
-  onItemsInputChange,
+  nextSuggestedNumber,
   onAddBox,
+  onStatusMessage,
 }: AddBoxTabProps) {
+  const [roomInput, setRoomInput] = useState('')
+  const [numberInput, setNumberInput] = useState(String(nextSuggestedNumber))
+  const [itemsInput, setItemsInput] = useState('')
+
+  useEffect(() => {
+    setNumberInput(String(nextSuggestedNumber))
+  }, [nextSuggestedNumber])
+
+  const handleSubmit = () => {
+    const result = onAddBox({
+      room: roomInput,
+      numberInput,
+      itemsInput,
+    })
+
+    onStatusMessage(result.message)
+
+    if (result.success) {
+      setRoomInput('')
+      setItemsInput('')
+      setNumberInput(String(result.nextSuggestedNumber))
+    }
+  }
+
   return (
     <>
       <div className="flex flex-col gap-3 md:flex-row md:flex-wrap">
@@ -26,7 +54,7 @@ function AddBoxTab({
             className="input input-bordered w-full"
             placeholder="Kitchen"
             value={roomInput}
-            onChange={(event) => onRoomInputChange(event.target.value)}
+            onChange={(event) => setRoomInput(event.target.value)}
           />
         </fieldset>
 
@@ -37,7 +65,7 @@ function AddBoxTab({
             type="number"
             min={1}
             value={numberInput}
-            onChange={(event) => onNumberInputChange(event.target.value)}
+            onChange={(event) => setNumberInput(event.target.value)}
           />
         </fieldset>
 
@@ -46,14 +74,14 @@ function AddBoxTab({
           <textarea
             className="textarea textarea-bordered"
             value={itemsInput}
-            onChange={(event) => onItemsInputChange(event.target.value)}
+            onChange={(event) => setItemsInput(event.target.value)}
             placeholder={'Plates\nCups\nPans'}
           />
         </fieldset>
       </div>
 
       <div className="card-actions justify-end">
-        <button type="button" className="btn btn-primary" onClick={onAddBox}>
+        <button type="button" className="btn btn-primary" onClick={handleSubmit}>
           Add Box
         </button>
       </div>

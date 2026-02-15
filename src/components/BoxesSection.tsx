@@ -1,26 +1,63 @@
+import { useState } from 'react'
 import type { Box } from '../lib/boxes'
+
+type ActionResult = {
+  success: boolean
+  message: string
+}
 
 type BoxesSectionProps = {
   boxes: Box[]
-  newItemByBox: Record<string, string>
+  onStatusMessage: (message: string) => void
   onUpdateBoxRoom: (boxId: string, room: string) => void
-  onUpdateBoxNumber: (boxId: string, nextNumberText: string) => void
-  onRemoveBox: (boxId: string) => void
-  onRemoveItemFromBox: (boxId: string, itemIndex: number) => void
-  onSetNewItemByBox: (boxId: string, value: string) => void
-  onAddItemToBox: (boxId: string) => void
+  onUpdateBoxNumber: (boxId: string, nextNumberText: string) => ActionResult
+  onRemoveBox: (boxId: string) => ActionResult
+  onRemoveItemFromBox: (boxId: string, itemIndex: number) => ActionResult
+  onAddItemToBox: (boxId: string, itemText: string) => ActionResult
 }
 
 function BoxesSection({
   boxes,
-  newItemByBox,
+  onStatusMessage,
   onUpdateBoxRoom,
   onUpdateBoxNumber,
   onRemoveBox,
   onRemoveItemFromBox,
-  onSetNewItemByBox,
   onAddItemToBox,
 }: BoxesSectionProps) {
+  const [newItemByBox, setNewItemByBox] = useState<Record<string, string>>({})
+
+  const handleUpdateNumber = (boxId: string, nextNumberText: string) => {
+    const result = onUpdateBoxNumber(boxId, nextNumberText)
+    if (result.message) {
+      onStatusMessage(result.message)
+    }
+  }
+
+  const handleRemoveBox = (boxId: string) => {
+    const result = onRemoveBox(boxId)
+    if (result.message) {
+      onStatusMessage(result.message)
+    }
+  }
+
+  const handleRemoveItem = (boxId: string, itemIndex: number) => {
+    const result = onRemoveItemFromBox(boxId, itemIndex)
+    if (result.message) {
+      onStatusMessage(result.message)
+    }
+  }
+
+  const handleAddItem = (boxId: string) => {
+    const result = onAddItemToBox(boxId, newItemByBox[boxId] ?? '')
+    if (result.message) {
+      onStatusMessage(result.message)
+    }
+    if (result.success) {
+      setNewItemByBox((current) => ({ ...current, [boxId]: '' }))
+    }
+  }
+
   return (
     <section className="flex flex-col gap-4">
       {boxes.map((box) => (
@@ -43,14 +80,14 @@ function BoxesSection({
                   type="number"
                   min={1}
                   value={box.number}
-                  onChange={(event) => onUpdateBoxNumber(box.id, event.target.value)}
+                  onChange={(event) => handleUpdateNumber(box.id, event.target.value)}
                 />
               </fieldset>
 
               <button
                 type="button"
                 className="btn btn-error btn-outline"
-                onClick={() => onRemoveBox(box.id)}
+                onClick={() => handleRemoveBox(box.id)}
               >
                 Delete Box
               </button>
@@ -71,7 +108,7 @@ function BoxesSection({
                     <button
                       type="button"
                       className="btn btn-xs btn-ghost"
-                      onClick={() => onRemoveItemFromBox(box.id, index)}
+                      onClick={() => handleRemoveItem(box.id, index)}
                     >
                       Remove
                     </button>
@@ -85,12 +122,17 @@ function BoxesSection({
                 className="input input-bordered join-item w-full"
                 placeholder="Add an item"
                 value={newItemByBox[box.id] ?? ''}
-                onChange={(event) => onSetNewItemByBox(box.id, event.target.value)}
+                onChange={(event) =>
+                  setNewItemByBox((current) => ({
+                    ...current,
+                    [box.id]: event.target.value,
+                  }))
+                }
               />
               <button
                 type="button"
                 className="btn btn-secondary join-item"
-                onClick={() => onAddItemToBox(box.id)}
+                onClick={() => handleAddItem(box.id)}
               >
                 Add Item
               </button>

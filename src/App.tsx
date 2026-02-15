@@ -1,49 +1,40 @@
+import { useState } from 'react'
 import AddBoxTab from './components/AddBoxTab'
 import BoxesSection from './components/BoxesSection'
 import OverviewCard from './components/OverviewCard'
 import PackingLabelsTab from './components/PackingLabelsTab'
 import useBoxes from './hooks/useBoxes'
-import usePackingLabels from './hooks/usePackingLabels'
 
 function App() {
   const {
     boxes,
-    roomInput,
-    numberInput,
-    itemsInput,
-    statusMessage,
-    newItemByBox,
-    fileInputRef,
     totalItems,
-    setStatusMessage,
-    setRoomInput,
-    setNumberInput,
-    setItemsInput,
-    addBox,
-    updateBox,
+    nextSuggestedBoxNumber,
+    addBoxFromForm,
+    updateBoxRoom,
     updateBoxNumber,
     removeBox,
     addItemToBox,
     removeItemFromBox,
-    exportCsv,
-    importCsv,
-    setNewItemDraft,
+    exportBoxesCsv,
+    importBoxesCsv,
   } = useBoxes()
+  const [statusMessage, setStatusMessage] = useState('')
+  const [activeTab, setActiveTab] = useState<'add-box' | 'packing-labels'>('add-box')
 
-  const {
-    activeTab,
-    labelsMaxHeightCm,
-    excludedLabelBoxIds,
-    setActiveTab,
-    setLabelsMaxHeightCm,
-    toggleLabelBoxSelection,
-    selectAllLabelBoxes,
-    clearAllLabelBoxes,
-    generatePackingLabels,
-  } = usePackingLabels(boxes)
+  const handleAddBox = (input: { room: string; numberInput: string; itemsInput: string }) => {
+    const result = addBoxFromForm(input)
+    setStatusMessage(result.message)
+    return result
+  }
 
-  const handleGeneratePackingLabels = () => {
-    const result = generatePackingLabels()
+  const handleImportCsv = async (file: File) => {
+    const result = await importBoxesCsv(file)
+    setStatusMessage(result.message)
+  }
+
+  const handleExportCsv = () => {
+    const result = exportBoxesCsv()
     setStatusMessage(result.message)
   }
 
@@ -54,9 +45,8 @@ function App() {
           boxesCount={boxes.length}
           totalItems={totalItems}
           statusMessage={statusMessage}
-          fileInputRef={fileInputRef}
-          onExportCsv={exportCsv}
-          onImportCsv={importCsv}
+          onExportCsv={handleExportCsv}
+          onImportCsv={handleImportCsv}
         />
 
         <section className="card bg-base-100 shadow">
@@ -82,24 +72,14 @@ function App() {
 
             {activeTab === 'add-box' ? (
               <AddBoxTab
-                roomInput={roomInput}
-                numberInput={numberInput}
-                itemsInput={itemsInput}
-                onRoomInputChange={setRoomInput}
-                onNumberInputChange={setNumberInput}
-                onItemsInputChange={setItemsInput}
-                onAddBox={addBox}
+                nextSuggestedNumber={nextSuggestedBoxNumber}
+                onAddBox={handleAddBox}
+                onStatusMessage={setStatusMessage}
               />
             ) : (
               <PackingLabelsTab
                 boxes={boxes}
-                labelsMaxHeightCm={labelsMaxHeightCm}
-                excludedLabelBoxIds={excludedLabelBoxIds}
-                onLabelsMaxHeightCmChange={setLabelsMaxHeightCm}
-                onSelectAllLabelBoxes={selectAllLabelBoxes}
-                onClearAllLabelBoxes={clearAllLabelBoxes}
-                onToggleLabelBoxSelection={toggleLabelBoxSelection}
-                onGeneratePackingLabels={handleGeneratePackingLabels}
+                onStatusMessage={setStatusMessage}
               />
             )}
           </div>
@@ -107,12 +87,11 @@ function App() {
 
         <BoxesSection
           boxes={boxes}
-          newItemByBox={newItemByBox}
-          onUpdateBoxRoom={(boxId, room) => updateBox(boxId, { room })}
+          onStatusMessage={setStatusMessage}
+          onUpdateBoxRoom={updateBoxRoom}
           onUpdateBoxNumber={updateBoxNumber}
           onRemoveBox={removeBox}
           onRemoveItemFromBox={removeItemFromBox}
-          onSetNewItemByBox={setNewItemDraft}
           onAddItemToBox={addItemToBox}
         />
       </div>

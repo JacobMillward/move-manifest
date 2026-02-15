@@ -1,22 +1,34 @@
-import type { ChangeEvent, RefObject } from 'react'
+import { useRef } from 'react'
+import type { ChangeEvent } from 'react'
 
 type OverviewCardProps = {
   boxesCount: number
   totalItems: number
   statusMessage: string
-  fileInputRef: RefObject<HTMLInputElement | null>
   onExportCsv: () => void
-  onImportCsv: (event: ChangeEvent<HTMLInputElement>) => Promise<void>
+  onImportCsv: (file: File) => Promise<void>
 }
 
 function OverviewCard({
   boxesCount,
   totalItems,
   statusMessage,
-  fileInputRef,
   onExportCsv,
   onImportCsv,
 }: OverviewCardProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleImportChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0]
+
+    if (!selectedFile) {
+      return
+    }
+
+    await onImportCsv(selectedFile)
+    event.target.value = ''
+  }
+
   return (
     <section className="card bg-base-100 shadow">
       <div className="card-body gap-4">
@@ -52,7 +64,7 @@ function OverviewCard({
             className="hidden"
             type="file"
             accept=".csv,text/csv"
-            onChange={onImportCsv}
+            onChange={handleImportChange}
           />
         </div>
 
