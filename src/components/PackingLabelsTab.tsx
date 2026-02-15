@@ -51,28 +51,16 @@ function PackingLabelsTab({
     }
 
     const html = buildPrintableLabelsHtml(selectedLabelBoxes, parsedWidth)
-    const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
 
-    const printWindow = window.open(url, '_blank')
+    const printWindow = window.open('', '_blank')
 
     if (!printWindow) {
-      const link = document.createElement('a')
-      link.href = url
-      link.target = '_blank'
-      link.rel = 'noopener noreferrer'
-      link.click()
-    }
-
-    if (!printWindow) {
-      URL.revokeObjectURL(url)
       onStatusMessage('Unable to open print window. Allow pop-ups and try again.')
       return
     }
 
-    setTimeout(() => {
-      URL.revokeObjectURL(url)
-    }, 60_000)
+    printWindow.document.write(html)
+    printWindow.document.close()
 
     onStatusMessage(`Generated ${selectedLabelBoxes.length} packing labels.`)
   }
