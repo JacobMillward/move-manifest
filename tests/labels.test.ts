@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Box } from '../src/lib/boxes'
-import { buildPrintableLabelsHtml } from '../src/lib/labels'
+import { buildPrintableLabelsHtml, chooseOrientation } from '../src/lib/labels'
 
 describe('label generation', () => {
   it('renders one table per box with configured width', () => {
@@ -63,5 +63,27 @@ describe('label generation', () => {
     expect(html).toContain('&lt;Office &amp; &quot;Study&quot;&gt;')
     expect(html).toContain('&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt; &amp; cables')
     expect(html).not.toContain('<script>alert("x")</script>')
+  })
+})
+
+describe('chooseOrientation', () => {
+  it('chooses landscape when a few small labels fit on one page', () => {
+    const boxes: Box[] = [
+      { id: '1', number: 1, room: 'Kitchen', items: ['Plates', 'Cups'] },
+      { id: '2', number: 2, room: 'Office', items: ['Laptop'] },
+    ]
+
+    expect(chooseOrientation(boxes, 8)).toBe('landscape')
+  })
+
+  it('chooses portrait when many labels would not fit on one landscape page', () => {
+    const boxes: Box[] = Array.from({ length: 20 }, (_, i) => ({
+      id: String(i),
+      number: i + 1,
+      room: 'Room',
+      items: Array.from({ length: 10 }, (_, j) => `Item ${j + 1}`),
+    }))
+
+    expect(chooseOrientation(boxes, 12)).toBe('portrait')
   })
 })

@@ -10,7 +10,16 @@ function PackingLabelsTab({
   boxes,
   onStatusMessage,
 }: PackingLabelsTabProps) {
-  const [labelsMaxWidthCm, setLabelsMaxWidthCm] = useState('15')
+  const LABEL_WIDTH_KEY = 'moving-helper-label-width'
+
+  const [labelsMaxWidthCm, setLabelsMaxWidthCm] = useState(
+    () => localStorage.getItem(LABEL_WIDTH_KEY) || '15',
+  )
+
+  const updateLabelsMaxWidthCm = (value: string) => {
+    setLabelsMaxWidthCm(value)
+    localStorage.setItem(LABEL_WIDTH_KEY, value)
+  }
   const [excludedLabelBoxIds, setExcludedLabelBoxIds] = useState<string[]>([])
 
   const selectedLabelBoxes = useMemo(
@@ -64,7 +73,7 @@ function PackingLabelsTab({
             min={0.5}
             step={0.1}
             value={labelsMaxWidthCm}
-            onChange={(event) => setLabelsMaxWidthCm(event.target.value)}
+            onChange={(event) => updateLabelsMaxWidthCm(event.target.value)}
           />
         </fieldset>
 

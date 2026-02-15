@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { buildPrintableLabelsMarkup, PRINT_LABELS_CSS } from '../lib/labels'
+import { buildPrintableLabelsMarkup, chooseOrientation, PRINT_LABELS_CSS } from '../lib/labels'
 import { loadBoxes } from '../lib/storage'
 
 function parseSearchParams(): { width: number; boxIds: string[] } {
@@ -24,10 +24,17 @@ function PrintLabelsPage() {
     [boxes, width],
   )
 
+  const orientation = useMemo(
+    () => chooseOrientation(boxes, width),
+    [boxes, width],
+  )
+
+  const pageCss = `@page { size: A4 ${orientation}; }\n${PRINT_LABELS_CSS}`
+
   if (boxes.length === 0) {
     return (
       <>
-        <style dangerouslySetInnerHTML={{ __html: PRINT_LABELS_CSS }} />
+        <style dangerouslySetInnerHTML={{ __html: pageCss }} />
         <div className="toolbar">
           <a href="/" style={{ marginRight: 'auto', textDecoration: 'none', color: '#333', alignSelf: 'center' }}>
             &larr; Back
@@ -42,7 +49,7 @@ function PrintLabelsPage() {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: PRINT_LABELS_CSS }} />
+      <style dangerouslySetInnerHTML={{ __html: pageCss }} />
       <div className="toolbar">
         <a href="/" style={{ marginRight: 'auto', textDecoration: 'none', color: '#333', alignSelf: 'center' }}>
           &larr; Back
