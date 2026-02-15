@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { boxesToCsv, parseBoxesFromCsv } from './csv'
-import type { Box } from './boxes'
+import type { Box } from '../src/lib/boxes'
+import { boxesToCsv, parseBoxesFromCsv } from '../src/lib/csv'
 
 function withoutIds(boxes: Box[]): Omit<Box, 'id'>[] {
   return boxes.map(({ id: _id, ...box }) => box)

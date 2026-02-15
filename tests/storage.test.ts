@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { loadBoxes, saveBoxes, STORAGE_KEY } from './storage'
-import type { Box } from './boxes'
+import type { Box } from '../src/lib/boxes'
+import { loadBoxes, saveBoxes, STORAGE_KEY } from '../src/lib/storage'
 
 function createMemoryStorage(): Storage {
   const store = new Map<string, string>()
