@@ -59,67 +59,70 @@ function BoxesSection({
   }
 
   return (
-    <section className="flex flex-col gap-4">
+    <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {boxes.map((box) => (
-        <article key={box.id} className="card bg-base-100 shadow">
-          <div className="card-body">
-            <div className="grid gap-3 md:grid-cols-[1fr_auto_auto] md:items-end">
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Room</legend>
-                <input
-                  className="input input-bordered"
-                  value={box.room}
-                  onChange={(event) => onUpdateBoxRoom(box.id, event.target.value)}
-                />
-              </fieldset>
-
-              <fieldset className="fieldset md:w-32">
-                <legend className="fieldset-legend">Number</legend>
-                <input
-                  className="input input-bordered"
-                  type="number"
-                  min={1}
-                  value={box.number}
-                  onChange={(event) => handleUpdateNumber(box.id, event.target.value)}
-                />
-              </fieldset>
-
+        <article key={box.id} className="card bg-base-100 shadow flex flex-col">
+          <div className="card-body flex flex-col gap-3 p-4">
+            {/* Header: Box <number input> [Delete] */}
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-bold">Box</span>
+              <input
+                className="input input-bordered input-sm w-20 text-center"
+                type="number"
+                min={1}
+                title="Box number"
+                value={box.number}
+                onChange={(event) => handleUpdateNumber(box.id, event.target.value)}
+              />
+              <div className="flex-1" />
               <button
                 type="button"
-                className="btn btn-error btn-outline"
+                className="btn btn-error btn-outline btn-xs"
                 onClick={() => handleRemoveBox(box.id)}
               >
-                Delete Box
+                Delete
               </button>
             </div>
+            {/* Room */}
+            <input
+              className="input input-bordered input-sm w-full"
+              placeholder="Room"
+              value={box.room}
+              onChange={(event) => onUpdateBoxRoom(box.id, event.target.value)}
+            />
 
-            <div className="divider my-1">Items</div>
-
-            {box.items.length === 0 ? (
-              <p className="text-sm text-base-content/70">No items in this box yet.</p>
-            ) : (
-              <ul className="list rounded-box bg-base-200">
-                {box.items.map((item, index) => (
-                  <li
-                    key={`${box.id}-${item}-${index}`}
-                    className="list-row flex items-center justify-between gap-3"
-                  >
-                    <span>{item}</span>
-                    <button
-                      type="button"
-                      className="btn btn-xs btn-ghost"
-                      onClick={() => handleRemoveItem(box.id, index)}
+            {/* Scrollable items list */}
+            <div className="flex-1 overflow-hidden">
+              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-base-content/50">
+                Contents ({box.items.length})
+              </p>
+              {box.items.length === 0 ? (
+                <p className="py-2 text-sm text-base-content/50">No items yet.</p>
+              ) : (
+                <ul className="max-h-48 overflow-y-auto rounded-box bg-base-200 text-sm">
+                  {box.items.map((item, index) => (
+                    <li
+                      key={`${box.id}-${item}-${index}`}
+                      className="flex items-center justify-between gap-2 border-b border-base-300 px-3 py-1.5 last:border-b-0"
                     >
-                      Remove
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
+                      <span className="min-w-0 break-words">{item}</span>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-xs shrink-0"
+                        onClick={() => handleRemoveItem(box.id, index)}
+                      >
+                        &times;
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
 
+            {/* Add item */}
             <div className="join w-full">
               <input
-                className="input input-bordered join-item w-full"
+                className="input input-bordered input-sm join-item w-full"
                 placeholder="Add an item"
                 value={newItemByBox[box.id] ?? ''}
                 onChange={(event) =>
@@ -128,13 +131,16 @@ function BoxesSection({
                     [box.id]: event.target.value,
                   }))
                 }
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') handleAddItem(box.id)
+                }}
               />
               <button
                 type="button"
-                className="btn btn-secondary join-item"
+                className="btn btn-secondary btn-sm join-item"
                 onClick={() => handleAddItem(box.id)}
               >
-                Add Item
+                Add
               </button>
             </div>
           </div>
