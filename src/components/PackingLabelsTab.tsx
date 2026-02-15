@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
 import type { Box } from '../lib/boxes'
-import { buildPrintableLabelsHtml } from '../lib/labels'
 
 type PackingLabelsTabProps = {
   boxes: Box[]
@@ -50,19 +49,8 @@ function PackingLabelsTab({
       return
     }
 
-    const html = buildPrintableLabelsHtml(selectedLabelBoxes, parsedWidth)
-
-    const printWindow = window.open('', '_blank')
-
-    if (!printWindow) {
-      onStatusMessage('Unable to open print window. Allow pop-ups and try again.')
-      return
-    }
-
-    printWindow.document.write(html)
-    printWindow.document.close()
-
-    onStatusMessage(`Generated ${selectedLabelBoxes.length} packing labels.`)
+    const ids = selectedLabelBoxes.map((box) => box.id).join(',')
+    window.location.href = `/labels?width=${parsedWidth}&ids=${ids}`
   }
 
   return (
