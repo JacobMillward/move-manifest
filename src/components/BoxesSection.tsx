@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Box } from '../lib/boxes'
+import RoomInput from './RoomInput'
 
 type ActionResult = {
   success: boolean
@@ -8,6 +9,7 @@ type ActionResult = {
 
 type BoxesSectionProps = {
   boxes: Box[]
+  rooms: string[]
   onStatusMessage: (message: string) => void
   onUpdateBoxRoom: (boxId: string, room: string) => void
   onUpdateBoxNumber: (boxId: string, nextNumberText: string) => ActionResult
@@ -18,6 +20,7 @@ type BoxesSectionProps = {
 
 function BoxesSection({
   boxes,
+  rooms,
   onStatusMessage,
   onUpdateBoxRoom,
   onUpdateBoxNumber,
@@ -84,11 +87,10 @@ function BoxesSection({
               </button>
             </div>
             {/* Room */}
-            <input
-              className="input input-bordered input-sm w-full"
-              placeholder="Room"
+            <RoomInput
               value={box.room}
-              onChange={(event) => onUpdateBoxRoom(box.id, event.target.value)}
+              rooms={rooms}
+              onChange={(room) => onUpdateBoxRoom(box.id, room)}
             />
 
             {/* Scrollable items list */}

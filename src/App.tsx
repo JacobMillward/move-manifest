@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import AddBoxTab from './components/AddBoxTab'
 import BoxesSection from './components/BoxesSection'
 import OverviewCard from './components/OverviewCard'
@@ -22,6 +22,11 @@ function App() {
     importBoxesCsv,
   } = useBoxes()
   const [statusMessage, setStatusMessage] = useState('')
+
+  const rooms = useMemo(
+    () => [...new Set(boxes.map((box) => box.room).filter(Boolean))].sort(),
+    [boxes],
+  )
 
   const activeTab = route === 'packing-labels' ? 'packing-labels' : 'add-box'
 
@@ -76,6 +81,7 @@ function App() {
             {activeTab === 'add-box' ? (
               <AddBoxTab
                 nextSuggestedNumber={nextSuggestedBoxNumber}
+                rooms={rooms}
                 onAddBox={handleAddBox}
                 onStatusMessage={setStatusMessage}
               />
@@ -90,6 +96,7 @@ function App() {
 
         <BoxesSection
           boxes={boxes}
+          rooms={rooms}
           onStatusMessage={setStatusMessage}
           onUpdateBoxRoom={updateBoxRoom}
           onUpdateBoxNumber={updateBoxNumber}

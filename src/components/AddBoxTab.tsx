@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import RoomInput from './RoomInput'
 
 type AddBoxSubmitResult = {
   success: boolean
@@ -8,6 +9,7 @@ type AddBoxSubmitResult = {
 
 type AddBoxTabProps = {
   nextSuggestedNumber: number
+  rooms: string[]
   onAddBox: (input: {
     room: string
     numberInput: string
@@ -18,6 +20,7 @@ type AddBoxTabProps = {
 
 function AddBoxTab({
   nextSuggestedNumber,
+  rooms,
   onAddBox,
   onStatusMessage,
 }: AddBoxTabProps) {
@@ -50,11 +53,11 @@ function AddBoxTab({
       <div className="flex flex-col gap-3 md:flex-row md:flex-wrap">
         <fieldset className="fieldset w-full md:flex-1">
           <legend className="fieldset-legend">Room</legend>
-          <input
-            className="input input-bordered w-full"
-            placeholder="Kitchen"
+          <RoomInput
             value={roomInput}
-            onChange={(event) => setRoomInput(event.target.value)}
+            rooms={rooms}
+            onChange={setRoomInput}
+            className="w-full"
           />
         </fieldset>
 
