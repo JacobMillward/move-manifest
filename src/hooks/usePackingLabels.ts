@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { Box } from '../lib/boxes'
 import { buildPrintableLabelsHtml } from '../lib/labels'
 
@@ -16,11 +16,6 @@ function usePackingLabels(boxes: Box[]) {
     () => boxes.filter((box) => !excludedLabelBoxIds.includes(box.id)),
     [boxes, excludedLabelBoxIds],
   )
-
-  useEffect(() => {
-    const existingBoxIds = new Set(boxes.map((box) => box.id))
-    setExcludedLabelBoxIds((current) => current.filter((boxId) => existingBoxIds.has(boxId)))
-  }, [boxes])
 
   const toggleLabelBoxSelection = (boxId: string) => {
     setExcludedLabelBoxIds((current) => {

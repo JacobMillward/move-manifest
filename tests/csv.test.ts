@@ -3,7 +3,11 @@ import type { Box } from '../src/lib/boxes'
 import { boxesToCsv, parseBoxesFromCsv } from '../src/lib/csv'
 
 function withoutIds(boxes: Box[]): Omit<Box, 'id'>[] {
-  return boxes.map(({ id: _id, ...box }) => box)
+  return boxes.map((box) => ({
+    number: box.number,
+    room: box.room,
+    items: box.items,
+  }))
 }
 
 describe('csv import/export', () => {
