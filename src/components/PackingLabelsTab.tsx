@@ -10,7 +10,7 @@ function PackingLabelsTab({
   boxes,
   onStatusMessage,
 }: PackingLabelsTabProps) {
-  const LABEL_WIDTH_KEY = 'moving-helper-label-width'
+  const LABEL_WIDTH_KEY = 'move-manifest-label-width'
 
   const [labelsMaxWidthCm, setLabelsMaxWidthCm] = useState(
     () => localStorage.getItem(LABEL_WIDTH_KEY) || '15',

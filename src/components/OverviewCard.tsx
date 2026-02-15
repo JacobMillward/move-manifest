@@ -59,6 +59,9 @@ function OverviewCard({
           >
             Import CSV
           </button>
+          <a href="/manifest" className="btn btn-sm btn-ghost">
+            Generate Manifest
+          </a>
           <input
             ref={fileInputRef}
             className="hidden"

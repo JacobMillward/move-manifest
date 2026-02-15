@@ -1,6 +1,6 @@
 import { sanitizeBoxes, sortBoxes, type Box } from './boxes'
 
-export const STORAGE_KEY = 'moving-helper-boxes'
+export const STORAGE_KEY = 'move-manifest-boxes'
 
 export function loadBoxes(storage: Storage = localStorage): Box[] {
   const stored = storage.getItem(STORAGE_KEY)
